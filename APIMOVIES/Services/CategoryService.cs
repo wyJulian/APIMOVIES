@@ -27,7 +27,7 @@ namespace APIMOVIES.Services
            throw new NotImplementedException();
         }
 
-        public async Task<CategoryDto> CreateCategoryAsync(CategoryCreateDto categoryCreateDto)
+        public async Task<CategoryDto> CreateCategoryAsync(CategoryUpdateCreateDto categoryCreateDto)
         {
             var categoryExist = await _categoryRepository.CategoryExistByNameAsync(categoryCreateDto.Name);
             if (categoryExist)
@@ -63,10 +63,30 @@ namespace APIMOVIES.Services
             var category = await _categoryRepository.GetCategoryAsync(id);
             return _mapper.Map<CategoryDto>(category);
         }
-
-        public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto)
+        public async Task<CategoryDto> UpdateCategoryAsync(CategoryUpdateCreateDto dto, int id)
         {
-            throw new NotImplementedException();
+            var categoryExist = await _categoryRepository.GetCategoryAsync(id);
+            if (categoryExist == null)
+            {
+                throw new Exception("A category with that id doesn't exist");
+            }
+
+            var categoryExistByName =  await _categoryRepository.CategoryExistByNameAsync(dto.Name);
+            if (categoryExistByName)
+            {
+                throw new Exception("A category with that name already exists.");
+            }
+
+            _mapper.Map(dto, categoryExist);
+            
+            var categoryUpdated = await _categoryRepository.UpdateCategoryAsync(categoryExist);
+
+            if (!categoryUpdated)
+            {
+                throw new Exception("Error updating category.");
+            }
+
+            return _mapper.Map<CategoryDto>(categoryExist);
         }
     }
 }

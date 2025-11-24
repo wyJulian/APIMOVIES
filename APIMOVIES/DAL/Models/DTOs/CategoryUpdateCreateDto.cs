@@ -2,7 +2,7 @@
 
 namespace APIMOVIES.DAL.Models.DTOs
 {
-    public class CategoryCreateDto
+    public class CategoryUpdateCreateDto
     {
         [Required(ErrorMessage = "Category name is mandatory")]
         [MaxLength(100, ErrorMessage = "Category name can't exceed 100 characters")]
