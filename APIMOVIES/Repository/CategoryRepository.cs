@@ -12,12 +12,12 @@ namespace APIMOVIES.Repository
         {
             _context = context;
         }
-        public async Task<bool> CategoryExistById(int id)
+        public async Task<bool> CategoryExistByIdAsync(int id)
         {
             return await _context.Categories.AnyAsync(c => c.Id == id);
         }
 
-        public async Task<bool> CategoryExistByName(string name)
+        public async Task<bool> CategoryExistByNameAsync(string name)
         {
             return await _context.Categories.AnyAsync(c => c.Name == name);
         }

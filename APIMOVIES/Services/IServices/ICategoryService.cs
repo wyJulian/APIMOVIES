@@ -7,10 +7,10 @@ namespace APIMOVIES.Services.IServices
     {
         Task<ICollection<CategoryDto>> GetCategoriesAsync();
         Task<CategoryDto> GetCategoryAsync(int id);
-        Task<bool> CategoryExistById(int id);
-        Task<bool> CategoryExistByName(string name);
-        Task<bool> CreateCategoryAsync(Category category);
-        Task<bool> UpdateCategoryAsync(Category category);
+        Task<bool> CategoryExistByIdAsync(int id);
+        Task<bool> CategoryExistByNameAsync(string name);
+        Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto);
         Task<bool> DeleteCategoryAsync(int id);
+        Task<CategoryDto> CreateCategoryAsync(CategoryCreateDto categoryCreateDto);
     }
 }

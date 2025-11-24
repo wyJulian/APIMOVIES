@@ -17,19 +17,34 @@ namespace APIMOVIES.Services
             _categoryRepository = categoryRepository;
             _mapper = mapper;
         }
-        public async Task<bool> CategoryExistById(int id)
+        public async Task<bool> CategoryExistByIdAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> CategoryExistByName(string name)
+        public async Task<bool> CategoryExistByNameAsync(string name)
         {
-            throw new NotImplementedException();
+           throw new NotImplementedException();
         }
 
-        public async Task<bool> CreateCategoryAsync(Category category)
+        public async Task<CategoryDto> CreateCategoryAsync(CategoryCreateDto categoryCreateDto)
         {
-            throw new NotImplementedException();
+            var categoryExist = await _categoryRepository.CategoryExistByNameAsync(categoryCreateDto.Name);
+            if (categoryExist)
+            {
+                throw new Exception("Category already exists.");
+            }
+
+            var category = _mapper.Map<Category>(categoryCreateDto);
+
+            var categoryCreated = await _categoryRepository.CreateCategoryAsync(category);
+
+            if (!categoryCreated)
+            {
+                throw new Exception("Error creating category.");
+            }
+
+            return _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<bool> DeleteCategoryAsync(int id)
@@ -49,7 +64,7 @@ namespace APIMOVIES.Services
             return _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<bool> UpdateCategoryAsync(Category category)
+        public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto)
         {
             throw new NotImplementedException();
         }
