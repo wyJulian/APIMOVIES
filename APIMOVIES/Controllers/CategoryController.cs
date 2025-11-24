@@ -81,6 +81,10 @@ namespace APIMOVIES.Controllers
             {
                 return Conflict(ex.Message);
             }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("doesn't found"))
+            {
+                return Conflict(ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
@@ -88,12 +92,11 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpDelete("{id:int}", Name = "DeleteCategoryAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<CategoryDto>> UpdateCategoryAsync([FromBody] CategoryUpdateCreateDto dto, int id)
+        public async Task<ActionResult<CategoryDto>> DeleteCategoryAsync(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -101,10 +104,10 @@ namespace APIMOVIES.Controllers
             }
             try
             {
-                var updatedCategory = await _categoryService.UpdateCategoryAsync(dto, id);
-                return Ok(updatedCategory);
+                var deletedCategory = await _categoryService.DeleteCategoryAsync(id);
+                return Ok(deletedCategory); 
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+            catch (InvalidOperationException ex) when (ex.Message.Contains("desn't found"))
             {
                 return Conflict(ex.Message);
             }

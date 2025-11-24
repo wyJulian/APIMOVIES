@@ -49,7 +49,13 @@ namespace APIMOVIES.Services
 
         public async Task<bool> DeleteCategoryAsync(int id)
         {
-            throw new NotImplementedException();
+            var categoryExist = await _categoryRepository.GetCategoryAsync(id);
+            if(categoryExist == null)
+            {
+                throw new Exception("A category with that id doesn't exist");
+            }
+            var categoryDeleted = await _categoryRepository.DeleteCategoryAsync(id);
+            return categoryDeleted;
         }
 
         public async Task<ICollection<CategoryDto>> GetCategoriesAsync()
