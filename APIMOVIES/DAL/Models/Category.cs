@@ -7,6 +7,5 @@ namespace APIMOVIES.DAL.Models
         [Required]
         [Display(Name = "Category name is mandatory")]
         public string Name { get; set; }
-        public string Description { get; set; }
     }
 }
