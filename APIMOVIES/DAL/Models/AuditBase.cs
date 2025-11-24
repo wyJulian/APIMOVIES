@@ -6,7 +6,7 @@ namespace APIMOVIES.DAL.Models
     {
         [Key]
         public int Id { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public virtual DateTime CreatedDate { get; set; }
+        public virtual DateTime? ModifiedDate { get; set; } 
     }
 }

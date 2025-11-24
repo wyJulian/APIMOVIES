@@ -38,7 +38,7 @@ namespace APIMOVIES.Services
 
         public async Task<ICollection<CategoryDto>> GetCategoriesAsync()
         {
-            var categories = _categoryRepository.GetCategoriesAsync();
+            var categories = await _categoryRepository.GetCategoriesAsync();
             return _mapper.Map<ICollection<CategoryDto>>(categories);
         }
 
