@@ -4,6 +4,7 @@ using APIMOVIES.DAL.Models.DTOs;
 using APIMOVIES.Repository.IRepository;
 using APIMOVIES.Services.IServices;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace APIMOVIES.Services
 {
@@ -44,7 +45,8 @@ namespace APIMOVIES.Services
 
         public async Task<CategoryDto> GetCategoryAsync(int id)
         {
-            throw new NotImplementedException();
+            var category = await _categoryRepository.GetCategoryAsync(id);
+            return _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<bool> UpdateCategoryAsync(Category category)

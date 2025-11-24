@@ -17,10 +17,21 @@ namespace APIMOVIES.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ICollection<CategoryDto>>> GetCategories()
+        public async Task<ActionResult<ICollection<CategoryDto>>> GetCategoriesAsync()
         {
             var categories = await _categoryService.GetCategoriesAsync();
             return Ok(categories);
         }
+        [HttpGet("{Id:int}",Name = "GetCategoryAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CategoryDto>> GetCategoryAsync(int id)
+        {
+            var categoryDto = await _categoryService.GetCategoryAsync(id);
+            return Ok(categoryDto);
+        }
+
     }
 }
