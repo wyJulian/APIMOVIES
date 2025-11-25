@@ -11,5 +11,6 @@ namespace APIMOVIES.DAL
 
         //Crear db set de cada modelo aqui abajo
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Movie> Movies { get; set; }
     }
 }
