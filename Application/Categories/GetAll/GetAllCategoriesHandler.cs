@@ -1,4 +1,3 @@
-using DAL.Interfaces;
 using Domain.Categories;
 using MediatR;
 

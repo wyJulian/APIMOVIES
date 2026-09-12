@@ -1,4 +1,4 @@
-using DAL.Interfaces;
+using Domain.Movies;
 using FluentValidation;
 using MediatR;
 

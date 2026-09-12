@@ -1,9 +1,4 @@
-﻿using Domain.Categories;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DAL.Interfaces
+namespace Domain.Categories
 {
     public interface ICategoryRepository
     {
