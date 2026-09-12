@@ -1,7 +1,8 @@
 using Application.Categories.GetAll;
 using DAL;
-using DAL.Interfaces;
 using DAL.Repositories;
+using Domain.Categories;
+using Domain.Movies;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 

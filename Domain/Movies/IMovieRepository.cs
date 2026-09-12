@@ -1,9 +1,4 @@
-﻿using Domain.Movies;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DAL.Interfaces
+namespace Domain.Movies
 {
     public interface IMovieRepository
     {
@@ -12,6 +7,6 @@ namespace DAL.Interfaces
         public Task<Movie> AddMovieAsync(Movie movie);
         public Task<Movie> UpdateMovieAsync(Movie movie);
         public Task<bool> DeleteMovieAsync(int id);
-        public Task<List<Movie>> GetMoviesByCategoryAsync(string category);  
+        public Task<List<Movie>> GetMoviesByCategoryAsync(string category);
     }
 }

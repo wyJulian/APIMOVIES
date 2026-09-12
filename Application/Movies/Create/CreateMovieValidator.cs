@@ -1,4 +1,4 @@
-using DAL.Interfaces;
+using Domain.Categories;
 using FluentValidation;
 
 namespace Application.Movies.Create

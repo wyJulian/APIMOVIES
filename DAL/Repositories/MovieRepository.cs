@@ -1,5 +1,4 @@
-﻿using DAL.Interfaces;
-using Domain.Movies;
+﻿using Domain.Movies;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
