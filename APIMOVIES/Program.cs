@@ -1,34 +1,26 @@
-using APIMOVIES.DAL;
-using APIMOVIES.MoviesMapper;
-using APIMOVIES.Repository;
-using APIMOVIES.Repository.IRepository;
-using APIMOVIES.Services;
-using APIMOVIES.Services.IServices;
+using Application.Categories.GetAll;
+using DAL;
+using DAL.Interfaces;
+using DAL.Repositories;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
-builder.Services.AddAutoMapper(x => x.AddProfile<Mappers>());
 
-//Dependency injectons for Services
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IMovieService, MovieService>();
-
-//Dependency injections for Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 
+builder.Services.AddValidatorsFromAssembly(typeof(GetAllCategoriesQuery).Assembly);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllCategoriesQuery).Assembly));
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
