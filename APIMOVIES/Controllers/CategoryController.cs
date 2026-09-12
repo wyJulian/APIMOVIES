@@ -1,5 +1,11 @@
-﻿using APIMOVIES.DAL.Models.DTOs;
-using APIMOVIES.Services.IServices;
+using Application.Categories.Create;
+using Application.Categories.Delete;
+using Application.Categories.GetAll;
+using Application.Categories.GetById;
+using Application.Categories.Update;
+using Domain.Categories;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIMOVIES.Controllers
@@ -8,112 +14,90 @@ namespace APIMOVIES.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
-        public CategoryController(ICategoryService categoryService)
+        private readonly ISender _sender;
+
+        public CategoryController(ISender sender)
         {
-            _categoryService = categoryService;
+            _sender = sender;
         }
+
         [HttpGet(Name = "GetCategoriesAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ICollection<CategoryDto>>> GetCategoriesAsync()
+        public async Task<ActionResult<List<CategoryDTO>>> GetCategoriesAsync()
         {
-            var categories = await _categoryService.GetCategoriesAsync();
+            var categories = await _sender.Send(new GetAllCategoriesQuery());
             return Ok(categories);
         }
 
-        [HttpGet("{id:int}",Name = "GetCategoryAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CategoryDto>> GetCategoryAsync(int id)
+        [HttpGet("{id:int}", Name = "GetCategoryAsync")]
+        public async Task<ActionResult<CategoryDTO>> GetCategoryAsync(int id)
         {
-            var categoryDto = await _categoryService.GetCategoryAsync(id);
-            return Ok(categoryDto);
+            try
+            {
+                var category = await _sender.Send(new GetCategoryByIdQuery { Id = id });
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(category);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Errors);
+            }
         }
 
         [HttpPost(Name = "CreateCategoryAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<CategoryDto>> CreateCategoryAsync([FromBody] CategoryUpdateCreateDto categoryCreateDto)
+        public async Task<ActionResult<CategoryDTO>> CreateCategoryAsync([FromBody] CreateCategoryCommand command)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try 
-            { 
-                var createdCategory = await _categoryService.CreateCategoryAsync(categoryCreateDto);
-                return CreatedAtRoute("GetCategoryAsync", new { id = createdCategory.Id }, createdCategory);
-            } 
-            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }  
-        }
-        [HttpPut("{id:int}",Name = "UpdateCategoryAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<CategoryDto>> UpdateCategoryAsync([FromBody] CategoryUpdateCreateDto dto,int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             try
             {
-                var updatedCategory = await _categoryService.UpdateCategoryAsync(dto,id);
-                return Ok(updatedCategory);
+                var created = await _sender.Send(command);
+                return CreatedAtRoute("GetCategoryAsync", new { id = created.Id }, created);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+            catch (ValidationException ex)
             {
-                return Conflict(ex.Message);
+                return BadRequest(ex.Errors);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("doesn't found"))
+        }
+
+        [HttpPut("{id:int}", Name = "UpdateCategoryAsync")]
+        public async Task<ActionResult<CategoryDTO>> UpdateCategoryAsync([FromBody] UpdateCategoryCommand command, int id)
+        {
+            command.Id = id;
+
+            try
             {
-                return Conflict(ex.Message);
+                var updated = await _sender.Send(command);
+                if (updated == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(updated);
             }
-            catch (Exception ex)
+            catch (ValidationException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return BadRequest(ex.Errors);
             }
         }
 
         [HttpDelete("{id:int}", Name = "DeleteCategoryAsync")]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<CategoryDto>> DeleteCategoryAsync(int id)
+        public async Task<ActionResult> DeleteCategoryAsync(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             try
             {
-                var deletedCategory = await _categoryService.DeleteCategoryAsync(id);
-                return Ok(deletedCategory); 
+                var deleted = await _sender.Send(new DeleteCategoryCommand { Id = id });
+                if (!deleted)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("desn't found"))
+            catch (ValidationException ex)
             {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return BadRequest(ex.Errors);
             }
         }
     }

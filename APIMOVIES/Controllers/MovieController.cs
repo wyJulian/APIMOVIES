@@ -1,7 +1,12 @@
-﻿using APIMOVIES.DAL.Models.DTOs;
-using APIMOVIES.Services;
-using APIMOVIES.Services.IServices;
-using Microsoft.AspNetCore.Http;
+using Application.Movies.Create;
+using Application.Movies.Delete;
+using Application.Movies.GetAll;
+using Application.Movies.GetByCategory;
+using Application.Movies.GetById;
+using Application.Movies.Update;
+using Domain.Movies;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIMOVIES.Controllers
@@ -10,114 +15,104 @@ namespace APIMOVIES.Controllers
     [ApiController]
     public class MovieController : ControllerBase
     {
-        private readonly IMovieService _movieService;
-        public MovieController(IMovieService movieService)
+        private readonly ISender _sender;
+
+        public MovieController(ISender sender)
         {
-            _movieService = movieService;
+            _sender = sender;
         }
+
         [HttpGet(Name = "GetMoviesAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ICollection<MovieDto>>> GetMoviesAsync()
+        public async Task<ActionResult<List<MovieDTO>>> GetMoviesAsync()
         {
-            var movies = await _movieService.GetMoviesAsync();
+            var movies = await _sender.Send(new GetAllMoviesQuery());
             return Ok(movies);
         }
 
-        [HttpGet("{id:int}",Name = "GetMovieAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<MovieDto>> GetMovieAsync(int id)
+        [HttpGet("{id:int}", Name = "GetMovieAsync")]
+        public async Task<ActionResult<MovieDTO>> GetMovieAsync(int id)
         {
-            var movie = await _movieService.GetMovieAsync(id);
-            return Ok(movie);
+            try
+            {
+                var movie = await _sender.Send(new GetMovieByIdQuery { Id = id });
+                if (movie == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(movie);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Errors);
+            }
+        }
+
+        [HttpGet("category/{category}", Name = "GetMoviesByCategoryAsync")]
+        public async Task<ActionResult<List<MovieDTO>>> GetMoviesByCategoryAsync(string category)
+        {
+            try
+            {
+                var movies = await _sender.Send(new GetMoviesByCategoryQuery { Category = category });
+                return Ok(movies);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Errors);
+            }
         }
 
         [HttpPost(Name = "CreateMovieAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<MovieDto>> CreateMovieAsync([FromBody] MovieCreateUpdateDto movieCreateUpdateDto)
+        public async Task<ActionResult<MovieDTO>> CreateMovieAsync([FromBody] CreateMovieCommand command)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             try
             {
-                var createdMovie = await _movieService.CreateMovieAsync(movieCreateUpdateDto);
-                return CreatedAtRoute("GetMovieAsync", new { id = createdMovie.Id }, createdMovie);
+                var created = await _sender.Send(command);
+                return CreatedAtRoute("GetMovieAsync", new { id = created.Id }, created);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+            catch (ValidationException ex)
             {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return BadRequest(ex.Errors);
             }
         }
 
-        [HttpPut("{id:int}",Name = "UpdateMovieAsync")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<MovieDto>> UpdateMovieAsync([FromBody] MovieCreateUpdateDto dto, int id)
+        [HttpPut("{id:int}", Name = "UpdateMovieAsync")]
+        public async Task<ActionResult<MovieDTO>> UpdateMovieAsync([FromBody] UpdateMovieCommand command, int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            command.Id = id;
+
             try
             {
-                var updatedMovie = await _movieService.UpdateMovieAsync(dto, id);
-                return Ok(updatedMovie);
+                var updated = await _sender.Send(command);
+                if (updated == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(updated);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+            catch (ValidationException ex)
             {
-                return Conflict(ex.Message);
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("doesn't found"))
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return BadRequest(ex.Errors);
             }
         }
 
         [HttpDelete("{id:int}", Name = "DeleteMovieAsync")]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<MovieDto>> DeleteMovieAsync(int id)
+        public async Task<ActionResult> DeleteMovieAsync(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             try
             {
-                var deletedMovie = await _movieService.DeleteMovieAsync(id);
-                return Ok(deletedMovie);
+                var deleted = await _sender.Send(new DeleteMovieCommand { Id = id });
+                if (!deleted)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("desn't found"))
+            catch (ValidationException ex)
             {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return BadRequest(ex.Errors);
             }
         }
     }
