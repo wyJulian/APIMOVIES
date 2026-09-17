@@ -24,7 +24,7 @@ namespace Application.Movies.Create
                 .MaximumLength(500);
 
             RuleFor(x => x.Age)
-                .GreaterThanOrEqualTo(0)
+                .GreaterThanOrEqualTo(5)
                 .When(x => x.Age.HasValue);
         }
     }

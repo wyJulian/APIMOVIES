@@ -8,7 +8,7 @@ namespace DAL.Configuration
     {
         public void Configure(EntityTypeBuilder<Movie> builder)
         {
-            builder.ToTable("Movie");
+            builder.ToTable("Movie", schema: "Catalog");
 
             builder.HasKey(m => m.Id);
 

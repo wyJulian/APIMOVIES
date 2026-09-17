@@ -23,6 +23,7 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpGet(Name = "GetMoviesAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<MovieDTO>>> GetMoviesAsync()
         {
             var movies = await _sender.Send(new GetAllMoviesQuery());
@@ -30,6 +31,9 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<MovieDTO>> GetMovieAsync(int id)
         {
             try
@@ -49,6 +53,8 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpGet("category/{category}", Name = "GetMoviesByCategoryAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<MovieDTO>>> GetMoviesByCategoryAsync(string category)
         {
             try
@@ -63,6 +69,8 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpPost(Name = "CreateMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<MovieDTO>> CreateMovieAsync([FromBody] CreateMovieCommand command)
         {
             try
@@ -77,6 +85,9 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpPut("{id:int}", Name = "UpdateMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<MovieDTO>> UpdateMovieAsync([FromBody] UpdateMovieCommand command, int id)
         {
             command.Id = id;
@@ -98,6 +109,9 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpDelete("{id:int}", Name = "DeleteMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteMovieAsync(int id)
         {
             try
