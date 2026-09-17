@@ -22,6 +22,7 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpGet(Name = "GetCategoriesAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<CategoryDTO>>> GetCategoriesAsync()
         {
             var categories = await _sender.Send(new GetAllCategoriesQuery());
@@ -29,6 +30,9 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetCategoryAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoryDTO>> GetCategoryAsync(int id)
         {
             try
@@ -48,6 +52,8 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpPost(Name = "CreateCategoryAsync")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CategoryDTO>> CreateCategoryAsync([FromBody] CreateCategoryCommand command)
         {
             try
@@ -62,6 +68,9 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpPut("{id:int}", Name = "UpdateCategoryAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoryDTO>> UpdateCategoryAsync([FromBody] UpdateCategoryCommand command, int id)
         {
             command.Id = id;
@@ -83,6 +92,9 @@ namespace APIMOVIES.Controllers
         }
 
         [HttpDelete("{id:int}", Name = "DeleteCategoryAsync")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteCategoryAsync(int id)
         {
             try

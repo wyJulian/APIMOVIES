@@ -8,7 +8,7 @@ namespace DAL.Configuration
     {
         public void Configure(EntityTypeBuilder<Category> builder)
         {
-            builder.ToTable("Category");
+            builder.ToTable("Category", schema: "Catalog");
 
             builder.HasKey(c => c.Id);
 
